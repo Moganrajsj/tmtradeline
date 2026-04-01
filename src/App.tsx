@@ -33,65 +33,42 @@ import { useState, useEffect, FormEvent } from "react";
 
 const PRODUCT_CATEGORIES = [
   {
-    id: "pure",
-    title: "Pure Spices",
-    description: "Our pure spices are sourced directly from farmers, ensuring 100% purity and authentic aroma. We offer high-quality Turmeric, Coriander, and Chilli powders for global export.",
-    items: [
-      { name: "Turmeric Powder", desc: "High curcumin content, vibrant yellow color.", image: "https://images.unsplash.com/photo-1615485290382-441e4d0c9cb5?q=80&w=800&auto=format&fit=crop" },
-      { name: "Coriander Powder", desc: "Aromatic and finely ground from premium seeds.", image: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?q=80&w=800&auto=format&fit=crop" },
-      { name: "Red Chilli Powder", desc: "Perfect heat and color for culinary excellence.", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?q=80&w=800&auto=format&fit=crop" },
-      { name: "Extra Hot Chilli Powder", desc: "Intense heat for spicy food lovers.", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?q=80&w=800&auto=format&fit=crop" },
-      { name: "Kashmiri Chilli Powder", desc: "Deep red color with mild pungency.", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?q=80&w=800&auto=format&fit=crop" },
-      { name: "Cumin Powder", desc: "Earthly flavor, freshly ground for maximum aroma.", image: "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?q=80&w=800&auto=format&fit=crop" },
-      { name: "Black Pepper Powder", desc: "Bold and spicy, sourced from the finest peppercorns.", image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?q=80&w=800&auto=format&fit=crop" },
-      { name: "White Pepper", desc: "Mild heat, perfect for creamy sauces and soups.", image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?q=80&w=800&auto=format&fit=crop" },
-      { name: "Garlic Powder", desc: "Convenient and flavorful, made from fresh garlic.", image: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?q=80&w=800&auto=format&fit=crop" },
-      { name: "Dry Ginger Powder", desc: "Zesty and warm, ideal for tea and baking.", image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=800&auto=format&fit=crop" },
-      { name: "Onion Powder", desc: "Sweet and savory, a versatile kitchen staple.", image: "https://picsum.photos/seed/onion_powder/800/600" },
-      { name: "Asafoetida Powder", desc: "Authentic Hing for traditional Indian tempering.", image: "https://picsum.photos/seed/hing_spice/800/600" },
-      { name: "Mustard Powder", desc: "Sharp and tangy, essential for pickles and sauces.", image: "https://picsum.photos/seed/mustard_spice/800/600" },
-      { name: "Mango Powder", desc: "Amchur powder for a tangy, fruity punch.", image: "https://picsum.photos/seed/mango_powder/800/600" }
-    ]
-  },
-  {
-    id: "blended",
-    title: "Blended Spices & Masalas",
-    description: "Expertly blended masalas that bring the traditional taste of India to your kitchen. Perfect for B2B wholesale and retail distribution.",
-    items: [
-      { name: "Sambar Powder", desc: "Authentic South Indian blend for perfect Sambar.", image: "https://picsum.photos/seed/sambar_powder/800/600" },
-      { name: "Rasam Powder", desc: "Spicy and tangy blend for traditional Rasam.", image: "https://picsum.photos/seed/rasam_powder/800/600" },
-      { name: "Curry Powder", desc: "Versatile blend for all types of vegetable curries.", image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=800&auto=format&fit=crop" },
-      { name: "Garam Masala", desc: "Warm and aromatic spice mix for rich gravies.", image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=800&auto=format&fit=crop" },
-      { name: "Chicken Masala", desc: "Perfectly balanced for flavorful chicken dishes.", image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=800&auto=format&fit=crop" },
-      { name: "Mutton Masala", desc: "Robust spices for tender and spicy mutton curry.", image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=800&auto=format&fit=crop" },
-      { name: "Kitchen King Masala", desc: "The all-purpose king of masalas.", image: "https://picsum.photos/seed/kitchen_king/800/600" },
-      { name: "Biryani Masala", desc: "Fragrant spices for the ultimate Biryani experience.", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=800&auto=format&fit=crop" },
-      { name: "Fish Masala", desc: "Tangy and spicy blend for delicious fish curries.", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=800&auto=format&fit=crop" },
-      { name: "Paneer Butter Masala", desc: "Creamy and mild blend for restaurant-style Paneer.", image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?q=80&w=800&auto=format&fit=crop" },
-      { name: "Pepper Masala", desc: "Bold peppery flavor for dry roasts and curries.", image: "https://picsum.photos/seed/pepper_masala/800/600" },
-      { name: "Egg Curry Masala", desc: "Savory blend for quick and tasty egg dishes.", image: "https://picsum.photos/seed/egg_masala/800/600" },
-      { name: "Chaat Masala", desc: "Tangy and salty sprinkle for snacks and salads.", image: "https://picsum.photos/seed/chaat_masala/800/600" },
-      { name: "Channa Masala", desc: "Spicy blend for authentic Punjabi Chole.", image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=800&auto=format&fit=crop" },
-      { name: "Chicken 65 Masala", desc: "Perfect spice mix for crispy Chicken 65.", image: "https://picsum.photos/seed/chicken65_masala/800/600" }
-    ]
-  },
-  {
     id: "fresh",
-    title: "Fresh Produce Export",
-    description: "Export-quality fresh produce from Dharmapuri, Tamil Nadu. We specialize in high-grade Coconuts and Tomatoes for international markets.",
+    title: "Fresh Produce",
+    seoKeyword: "fresh vegetables exporter india",
+    description: "Premium export-quality fresh vegetables. Sourced directly from farms to ensure maximum freshness and quality.",
     items: [
-      { name: "Coconut (Dry / Fresh Export Quality)", desc: "Large size, high oil content, fresh from farms.", image: "https://images.unsplash.com/photo-1584306679120-2c4701df1487?q=80&w=800&auto=format&fit=crop" },
-      { name: "Tomato (Fresh Export Grade)", desc: "Firm, red, and long shelf-life for export.", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?q=80&w=800&auto=format&fit=crop" }
+      { name: "Tomato", desc: "Firm, red, and long shelf-life for export.", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?q=80&w=800&auto=format&fit=crop" },
+      { name: "Raw Red Chilli", desc: "Fresh, vibrant, and spicy export-grade red chillies.", image: "/images/products/red_chilli.png" },
+      { name: "Coconut (Semi Husked)", desc: "Large size, high oil content, fresh from farms.", image: "/images/products/coconut.webp" }
     ]
   },
   {
-    id: "other",
-    title: "Other Food Products",
-    description: "Complementary food products including traditional chutney powders and fresh pastes.",
+    id: "whole-spices",
+    title: "Whole Spices",
+    seoKeyword: "whole spices exporter india",
+    description: "Aromatic and authentic whole spices. Hand-picked and meticulously sorted to guarantee superior flavor profiles.",
     items: [
-      { name: "Idly Chutney Powder", desc: "Traditional Milagai Podi for Idly and Dosa.", image: "https://picsum.photos/seed/idly_podi/800/600" },
-      { name: "Paruppu Podi", desc: "Lentil powder for a quick and healthy meal.", image: "https://picsum.photos/seed/paruppu_podi/800/600" },
-      { name: "Ginger Garlic Paste", desc: "Freshly made, no artificial preservatives.", image: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?q=80&w=800&auto=format&fit=crop" }
+      { name: "Cardamom", desc: "Highly aromatic green cardamom pods, perfect for sweet and savory dishes.", image: "/images/products/cardamom.avif" },
+      { name: "Cashew Nut", desc: "Premium grade, whole white cashew nuts with a rich buttery taste.", image: "/images/products/cashew_nut.jpg" }
+    ]
+  },
+  {
+    id: "spice-powders",
+    title: "Spice Powders",
+    seoKeyword: "spice powder exporter india",
+    description: "Our pure spices are sourced directly from farmers, ensuring 100% purity and authentic aroma. Ground to perfection.",
+    items: [
+      { name: "Turmeric Powder", desc: "High curcumin content, vibrant yellow color.", image: "/images/products/turmeric_powder.avif" },
+      { name: "Coriander Powder", desc: "Aromatic and finely ground from premium seeds.", image: "/images/products/coriander_powder.jpg" },
+      { name: "Red Chilli Powder", desc: "Perfect heat and color for culinary excellence.", image: "/images/products/red_chilli_powder.jpg" },
+      { name: "Red Chilli Flakes", desc: "Spicy and vibrant flakes for a burst of flavor.", image: "/images/products/red_chili_flakes.jpg" },
+      { name: "Cumin Powder", desc: "Earthly flavor, freshly ground for maximum aroma.", image: "/images/products/cumin_powder.webp" },
+      { name: "Black Pepper Powder", desc: "Bold and spicy, sourced from the finest peppercorns.", image: "/images/products/black_pepper.jpg" },
+      { name: "White Pepper Powder", desc: "Mild heat, perfect for creamy sauces and soups.", image: "/images/products/white_pepper_powder.jpg" },
+      { name: "Garlic Powder", desc: "Convenient and flavorful, made from fresh garlic.", image: "/images/products/garlic_powder.jpg" },
+      { name: "Dry Ginger Powder", desc: "Zesty and warm, ideal for tea and baking.", image: "/images/products/dry_ginger_powder.jpg" },
+      { name: "Red Onion Powder", desc: "Sweet and savory, a versatile kitchen staple.", image: "/images/products/red_onion_powder.jpeg" }
     ]
   }
 ];
@@ -535,7 +512,10 @@ export default function App() {
                       <span className="text-brand-gold text-[10px] uppercase tracking-[0.3em] font-black">Category</span>
                     </div>
                     <h4 className="text-2xl md:text-4xl font-serif text-brand-earth mb-8 tracking-tight">{category.title}</h4>
-                    <p className="text-gray-500 leading-relaxed mb-10 font-light text-sm md:text-base">{category.description}</p>
+                    <p className="text-gray-500 leading-relaxed mb-6 font-light text-sm md:text-base">{category.description}</p>
+                    {category.seoKeyword && (
+                      <p className="text-[10px] text-gray-400 mb-10 italic">Tags: {category.seoKeyword}</p>
+                    )}
                     <button 
                       onClick={() => openQuoteModal(`Bulk Inquiry: ${category.title}`)}
                       className="text-[9px] md:text-[10px] uppercase font-black tracking-[0.3em] text-brand-earth hover:text-brand-gold transition-colors flex items-center gap-4 group"
