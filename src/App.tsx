@@ -78,49 +78,57 @@ const BLOG_POSTS = [
     title: "The Health Benefits of Pure Turmeric Powder",
     excerpt: "Discover why Turmeric is known as the golden spice and how it can boost your immunity...",
     date: "March 25, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "/images/blog/blog_turmeric_health.png"
   },
   {
     title: "How to Choose the Best Spices for Export",
     excerpt: "Quality standards and certifications you need to look for when importing Indian spices...",
     date: "March 20, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "/images/blog/blog_choose_spices.png"
   },
   {
     title: "Dharmapuri: The Spice Hub of Tamil Nadu",
     excerpt: "Exploring the rich agricultural heritage of Dharmapuri and its contribution to global trade...",
     date: "March 15, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "/images/blog/blog_dharmapuri.png"
   },
   {
     title: "Sustainable Farming: The Future of Spice Export",
     excerpt: "How we work with local farmers to implement sustainable practices that ensure long-term quality...",
     date: "March 10, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "/images/blog/blog_sustainable_farming.png"
   },
   {
     title: "The Science of Spice Preservation",
     excerpt: "Understanding the dehydration process and how it locks in flavor and nutrients for years...",
     date: "March 05, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "/images/blog/blog_spice_preservation.png"
   },
   {
     title: "Global Spice Trends in 2026",
     excerpt: "A deep dive into the rising demand for organic and authentic Indian spice blends in Western markets...",
     date: "March 01, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "/images/blog/blog_global_trends.png"
   },
   {
     title: "Logistics: From Farm to Global Port",
     excerpt: "The journey of a spice container: How we manage the complex supply chain for international trade...",
     date: "February 25, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800&auto=format&fit=crop"
   },
   {
     title: "Traditional vs. Modern Grinding Techniques",
     excerpt: "Why cold-grinding is essential for maintaining the volatile oils and aroma of premium spices...",
     date: "February 20, 2026",
-    author: "Admin"
+    author: "Admin",
+    image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?q=80&w=800&auto=format&fit=crop"
   }
 ];
 
@@ -162,6 +170,12 @@ export default function App() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [isContactLoading, setIsContactLoading] = useState(false);
+  const [isQuoteLoading, setIsQuoteLoading] = useState(false);
+  const [isNewsletterLoading, setIsNewsletterLoading] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "success" | "error">("idle");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -192,8 +206,25 @@ export default function App() {
     window.open(`https://wa.me/919677402451?text=${encodedText}`, '_blank');
   };
 
-  const handleQuoteSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmission = async (data: any) => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error('Failed to send email');
+      return true;
+    } catch (error) {
+      console.error('Email error:', error);
+      return false;
+    }
+  };
+
+  const handleQuoteSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsQuoteLoading(true);
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
@@ -201,20 +232,81 @@ export default function App() {
     const quantity = formData.get('quantity') as string;
     const requirements = formData.get('requirements') as string;
     
-    const message = `Requirement for ${selectedProduct}.\nCompany: ${company}\nQuantity: ${quantity}\nDetails: ${requirements}`;
-    handleWhatsAppInquiry(name, email, `Quote Request: ${selectedProduct}`, message);
-    setIsQuoteModalOpen(false);
+    const success = await handleEmailSubmission({
+      name,
+      email,
+      company,
+      quantity,
+      subject: selectedProduct,
+      message: requirements,
+      isQuote: true
+    });
+
+    setIsQuoteLoading(false);
+    if (success) {
+      setFormStatus("success");
+      setTimeout(() => {
+        setIsQuoteModalOpen(false);
+        setFormStatus("idle");
+      }, 3000);
+    } else {
+      // Fallback to WhatsApp
+      const message = `Requirement for ${selectedProduct}.\nCompany: ${company}\nQuantity: ${quantity}\nDetails: ${requirements}`;
+      handleWhatsAppInquiry(name, email, `Quote Request: ${selectedProduct}`, message);
+      setIsQuoteModalOpen(false);
+    }
   };
 
-  const handleContactSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleContactSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsContactLoading(true);
+    setFormStatus("submitting");
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const subject = formData.get('subject') as string;
     const message = formData.get('message') as string;
     
-    handleWhatsAppInquiry(name, email, subject, message);
+    const success = await handleEmailSubmission({
+      name,
+      email,
+      subject,
+      message,
+      isQuote: false
+    });
+
+    setIsContactLoading(false);
+    if (success) {
+      setFormStatus("success");
+      (e.target as HTMLFormElement).reset();
+      setTimeout(() => setFormStatus("idle"), 5000);
+    } else {
+      setFormStatus("error");
+      handleWhatsAppInquiry(name, email, subject, message);
+    }
+  };
+
+  const handleNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setIsNewsletterLoading(true);
+    
+    const success = await handleEmailSubmission({
+      name: "Newsletter Subscriber",
+      email: newsletterEmail,
+      subject: "Newsletter Subscription",
+      message: `New newsletter subscription request from: ${newsletterEmail}`,
+      isNewsletter: true
+    });
+
+    setIsNewsletterLoading(false);
+    if (success) {
+      setNewsletterStatus("success");
+      setNewsletterEmail("");
+      setTimeout(() => setNewsletterStatus("idle"), 5000);
+    } else {
+      setNewsletterStatus("error");
+    }
   };
 
   return (
@@ -740,7 +832,7 @@ export default function App() {
               <article key={i} className="group cursor-pointer">
                 <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden mb-8">
                   <img 
-                    src={`https://picsum.photos/seed/spice${i+20}/800/1000`} 
+                    src={post.image} 
                     alt={post.title} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     referrerPolicy="no-referrer"
@@ -949,10 +1041,14 @@ export default function App() {
                   <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Your Message</label>
                   <textarea name="message" required rows={4} className="w-full border-b-2 border-gray-100 py-4 focus:border-brand-gold outline-none transition-all resize-none font-serif text-lg" placeholder="Describe your wholesale requirements..."></textarea>
                 </div>
-                <button type="submit" className="group relative w-full bg-brand-earth text-white py-6 rounded-sm font-black text-[10px] uppercase tracking-[0.4em] overflow-hidden transition-all hover:bg-brand-gold">
-                  <span className="relative z-10">Dispatch via WhatsApp</span>
+                <button type="submit" disabled={isContactLoading} className="group relative w-full bg-brand-earth text-white py-6 rounded-sm font-black text-[10px] uppercase tracking-[0.4em] overflow-hidden transition-all hover:bg-brand-gold disabled:opacity-70">
+                  <span className="relative z-10">
+                    {isContactLoading ? "Sending Inquiry..." : formStatus === "success" ? "Inquiry Sent!" : "Dispatch Inquiry"}
+                  </span>
                   <div className="absolute inset-0 bg-brand-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                 </button>
+                {formStatus === "success" && <p className="text-green-600 text-xs text-center font-bold">Email sent successfully! We'll reach out soon.</p>}
+                {formStatus === "error" && <p className="text-red-600 text-xs text-center font-bold">SMTP error. Redirecting to WhatsApp fallback...</p>}
               </form>
             </div>
           </div>
@@ -1007,12 +1103,33 @@ export default function App() {
           <div className="lg:col-span-3">
             <h5 className="font-black text-[10px] uppercase tracking-[0.4em] text-brand-gold mb-10">Newsletter</h5>
             <p className="text-gray-400 text-sm font-light mb-8">Subscribe to our market reports and harvest updates.</p>
-            <div className="relative">
-              <input type="email" placeholder="Email Address" className="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-sm outline-none focus:border-brand-gold transition-colors text-sm" />
-              <button className="absolute right-2 top-2 bottom-2 bg-brand-gold px-4 rounded-sm hover:bg-white hover:text-brand-gold transition-all">
-                <ArrowRight className="w-4 h-4" />
+            <form onSubmit={handleNewsletterSubmit} className="relative">
+              <input 
+                type="email" 
+                required
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder="Email Address" 
+                className="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-sm outline-none focus:border-brand-gold transition-colors text-sm" 
+              />
+              <button 
+                type="submit"
+                disabled={isNewsletterLoading}
+                className="absolute right-2 top-2 bottom-2 bg-brand-gold px-4 rounded-sm hover:bg-white hover:text-brand-gold transition-all disabled:opacity-50"
+              >
+                {isNewsletterLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
+                )}
               </button>
-            </div>
+            </form>
+            {newsletterStatus === "success" && (
+              <p className="mt-4 text-green-500 text-[10px] font-black uppercase tracking-widest">Successfully subscribed!</p>
+            )}
+            {newsletterStatus === "error" && (
+              <p className="mt-4 text-brand-gold text-[10px] font-black uppercase tracking-widest">Failed to subscribe. Please try again.</p>
+            )}
           </div>
         </div>
         
@@ -1120,9 +1237,10 @@ export default function App() {
                     <label className="text-[10px] uppercase font-black text-gray-400">Detailed Requirements</label>
                     <textarea name="requirements" rows={3} className="w-full border-b-2 border-gray-100 py-3 outline-none focus:border-brand-gold resize-none text-sm md:text-base" placeholder="Please specify packaging, certifications, or destination..."></textarea>
                   </div>
-                  <button type="submit" className="w-full bg-brand-gold text-white py-4 md:py-5 rounded-sm font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] hover:bg-brand-earth transition-all shadow-xl shadow-brand-gold/20">
-                    Submit Quote via WhatsApp
+                  <button type="submit" disabled={isQuoteLoading} className="w-full bg-brand-gold text-white py-4 md:py-5 rounded-sm font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] hover:bg-brand-earth transition-all shadow-xl shadow-brand-gold/20 disabled:opacity-70">
+                    {isQuoteLoading ? "Submitting..." : formStatus === "success" ? "Quote Request Sent!" : "Submit Quote Request"}
                   </button>
+                  {formStatus === "success" && <p className="text-green-600 text-xs text-center font-bold mt-2">Request submitted successfully via SMTP.</p>}
                 </form>
               </div>
             </motion.div>
